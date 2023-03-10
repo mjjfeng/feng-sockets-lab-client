@@ -313,7 +313,13 @@ const updateNominationsRemainingUI = (newNominationsRemaining) => {
  * @param {boolean} upvote - true if you are voting for the pokemon, false if voting against
  */
 function voteForPokemon(pokemon, upvote) {
-	// your code goes here!
+	if(id && username != "") {
+		const jsonreq = {type: "VOTE", candidate: pokemon, voter: id, upvote: upvote}
+		socket.send(JSON.stringify(jsonreq))
+	}
+	else {
+		console.log("error nominate")	
+	}
 }
 
 /**
@@ -323,7 +329,13 @@ function voteForPokemon(pokemon, upvote) {
  * @param {boolean} nominate - whether the user is nominating or unnominating the pokemon
  */
 function nominatePokemon(pokemon, nominate) {
-	// your code goes here!
+	if(id && username != "") {
+		const Req = {type: "NOMINATE", nominee: pokemon, nominater: id, unnominate: !nominate}
+		socket.send(JSON.stringify(Req))
+	}
+	else {
+		console.log("error nominate")	
+	}
 }
 
 /**
@@ -341,7 +353,7 @@ function connect() {
 		 * TODO: Write a line here opening a socket connection with the server, and assign
 		 * it to the socket variable!
 		 */
-
+		socket = new WebSocket(URL)
 		
 		// heartbeat functionality - do NOT touch! D:<
 		socket.onopen = () => {
@@ -375,6 +387,8 @@ function connect() {
 					 * TODO: Write logic here handling when the client
 					 * receives a "NOMINEES" event from the server
 					 */
+					console.log(eventData);
+					updateNominees(eventData.nominees);
 					break;
 				}
 				case "UPDATE": {
@@ -382,6 +396,11 @@ function connect() {
 					 * TODO: Write logic here handling when the client
 					 * receives a "UPDATE" event from the server
 					 */
+					votes = eventData.user.votes;
+					nominations = eventData.user.nominations;
+					updateVotesRemainingUI(votes);
+					updateNominationsRemainingUI(nominations);
+					console.log(eventData);
 					break;
 				}
 				case "GREET": {
@@ -396,6 +415,7 @@ function connect() {
 				}
 				case "HEARTBEAT" : {
 					_heartbeat = new Date().getTime();
+					console.log(evendData)
 					break;
 				}
 				case "IP_SPAM" : {
